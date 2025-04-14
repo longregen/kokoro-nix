@@ -1,18 +1,8 @@
 {
   description = "Audio service environment";
 
-  # Add NVIDIA cache configuration
-  nixConfig = {
-    extra-substituters = [
-      "https://cuda-maintainers.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-    ];
-  };
-
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -40,23 +30,190 @@
                 meta = oldAttrs.meta // {broken = false;};
               });
               
+              # espeakng-loader package
+              espeakng-loader = prev.python312Packages.buildPythonPackage {
+                pname = "espeakng-loader";
+                version = "0.1.0";
+                format = "setuptools";
+                src = prev.fetchFromGitHub {
+                  owner = "thewh1teagle";
+                  repo = "espeakng-loader";
+                  rev = "main";
+                  hash = "sha256:1lw1raa0wrqfl0893zaxjzv5j778qfp5vm236nra547hhqydld8z";
+                };
+                buildInputs = [ prev.espeak-ng ];
+                propagatedBuildInputs = [ ];
+                doCheck = false;
+                meta = {
+                  description = "Python loader for espeak-ng";
+                  homepage = "https://github.com/thewh1teagle/espeakng-loader";
+                };
+              };
+              
+              # cn2an package
+              cn2an = prev.python312Packages.buildPythonPackage {
+                pname = "cn2an";
+                version = "0.5.23";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/py3/c/cn2an/cn2an-0.5.23-py3-none-any.whl";
+                  hash = "sha256:1gqw3wj6jmwki10c6fc1i05lzykykgv53aydih1mqxkn6v2v76mi";
+                };
+                propagatedBuildInputs = [ ];
+                doCheck = false;
+                meta = {
+                  description = "Convert Chinese numerals and Arabic numerals";
+                  homepage = "https://github.com/Ailln/cn2an";
+                };
+              };
+              
+              # mishkal-hebrew package
+              mishkal-hebrew = prev.python312Packages.buildPythonPackage {
+                pname = "mishkal-hebrew";
+                version = "0.3.5";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/d6/b6/eaf92c7f1aa9b37aac4ace213aba289baeade73ab0bfafd052a2e84da7ce/mishkal_hebrew-0.3.5-py3-none-any.whl";
+                  hash = "sha256:1jb573xqv38wdknv6ykmrhips1ahysflsbj258r87nknzkqrr4jq";
+                };
+                propagatedBuildInputs = [ ];
+                doCheck = false;
+                meta = {
+                  description = "Hebrew diacritization library";
+                  homepage = "https://github.com/NLPH/mishkal-hebrew";
+                };
+              };
+              
+              # mojimoji package
+              mojimoji = prev.python312Packages.buildPythonPackage {
+                pname = "mojimoji";
+                version = "0.0.13";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/cd/4e/0d7f019386bc4feb8096b5e8150d2e2dadd377be178d950654830541b5a3/mojimoji-0.0.13-cp310-cp310-macosx_10_9_x86_64.whl";
+                  hash = "sha256:132vjixcbri25pish9qf9snpj8cm9ihllp9nxwz5gb5qgvnmzqyl";
+                };
+                propagatedBuildInputs = [ ];
+                doCheck = false;
+                meta = {
+                  description = "Fast converter between Japanese hankaku and zenkaku characters";
+                  homepage = "https://github.com/studio-ousia/mojimoji";
+                };
+              };
+              
+              # phonemizer-fork package
+              phonemizer-fork = prev.python312Packages.buildPythonPackage {
+                pname = "phonemizer-fork";
+                version = "3.3.2";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/64/f1/0dcce21b0ae16a82df4b6583f8f3ad8e55b35f7e98b6bf536a4dd225fa08/phonemizer_fork-3.3.2-py3-none-any.whl";
+                  hash = "sha256:0x2b4r4i65k29dyw8n6f8scqrrsz4qrc1x78v8jkhfqqyiv5qc4p";
+                };
+                propagatedBuildInputs = [ ];
+                doCheck = false;
+                meta = {
+                  description = "Simple text to phonemes converter for multiple languages";
+                  homepage = "https://github.com/bootphon/phonemizer";
+                };
+              };
+              
+              # pyopenjtalk package
+              pyopenjtalk = prev.python312Packages.buildPythonPackage {
+                pname = "pyopenjtalk";
+                version = "0.4.1";
+                format = "sttuptoopstools";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/58/74/dc031c696f447ba3817ba31b504bf11a9756c1f90f7d563e343883e10b44a/pyopenjtalk-0.4trgz
+                  hash = "sha256:1p7h80sgk7hipvcbk3ba4ymxfspzd2bfnwy2g4f2rdf2gxps9bfm";
+                };
+                nativeBuildInputs = with prev.python312Packages; [
+                  numpy
+                ] ++ [ prev.cmake ];
+                propagatedBuildInputs = with prev.python312Packages; [
+                  numpy
+                ];
+                doCheck = false;
+                meta = {
+                  description = "Python wrapper for OpenJTalk";
+                  homepage = "https://github.com/r9y9/pyopenjtalk";
+                };
+              };
+              
+              # pypinyin-dict package
+              pypinyin-dict = prev.python312Packages.buildPythonPackage {
+                pname = "pypinyin-dict";
+                version = "0.9.0";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/41/8f/add772a61256a9ac91d95bf5ec3dffc1de97c8e5da53d40655044b2e1509/pypinyin_dict-0.9.0-py2.py3-none-any.whl";
+                  hash = "sha256:0yh6jy0fi62p4zfmair2kvd3fa6pijz7fcakcyw09mw7mx0bxkqh";
+                };
+                propagatedBuildInputs = [ ];
+                doCheck = false;
+                meta = {
+                  description = "Pinyin dictionaries for pypinyin";
+                  homepage = "https://github.com/mozillazg/pypinyin-dict";
+                };
+              };
+              
+              # spacy-curated-transformers package
+              spacy-curated-transformers = prev.python312Packages.buildPythonPackage {
+                pname = "spacy-curated-transformers";
+                version = "2.1.2";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/65/4a/9c2b5d676f820e2d3672d8532def8a193e8cb9530824ce16b232b707c1a0/spacy_curated_transformers-2.1.2-py2.py3-none-any.whl";
+                  hash = "sha256:069my5q5nlw6hlrk5agqirxki6272mgjj4c9242a8ajdapb2dmfl";
+                };
+                propagatedBuildInputs = [ ];
+                doCheck = false;
+                meta = {
+                  description = "Curated transformer models for spaCy";
+                  homepage = "https://github.com/explosion/spacy-curated-transformers";
+                };
+              };
+              
+              # underthesea package
+              underthesea = prev.python312Packages.buildPythonPackage {
+                pname = "underthesea";
+                version = "6.8.4";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/23/17/8c9b8faa546fc0b1d2c2d95bc3539422946c3614f14db91272b219307c9f/underthesea-6.8.4-py3-none-any.whl";
+                  hash = "sha256:1iz9kvkxhixw3ja54rrbh1aav7ykgi6x7gz2pqmll3ijk5zkihfx";
+                };
+                propagatedBuildInputs = [ ];
+                doCheck = false;
+                meta = {
+                  description = "Vietnamese NLP Toolkit";
+                  homepage = "https://github.com/undertheseanlp/underthesea";
+                };
+              };
+              
               # Main misaki package
               misaki = prev.python312Packages.buildPythonPackage {
                 pname = "misaki";
                 version = "0.9.4";
-                format = "setuptools";
+                format = "pyproject";
                 src = prev.python312Packages.fetchPypi {
                   pname = "misaki";
                   version = "0.9.4";
-                  sha256 = "90e2eeb169786c014c429e5058d2ea6bcd02d651f2a24450ba6c9ffc0f8da15a";
+                  hash = "sha256:0nm1il7zr7vcp98498pja7b05kbbxb95hl4y89602v3qd6qyxqlh";
                 };
+                nativeBuildInputs = with prev.python312Packages; [
+                  setuptools
+                  wheel
+                  hatchling
+                ];
                 propagatedBuildInputs = with prev.python312Packages; [
                   # Common dependencies
+                  addict
+                  regex
                   numpy
-                  torch
+                  torch-bin
                   spacy
                   num2words
-                  regex
                   # English support
                   nltk
                   # Japanese support (optional)
@@ -65,6 +222,8 @@
                   # Chinese support (optional)
                   jieba
                   pypinyin
+                  # Add espeakng-loader
+                  espeakng-loader
                 ];
                 doCheck = false;
               };
@@ -73,20 +232,36 @@
               kokoro = prev.python312Packages.buildPythonPackage {
                 pname = "kokoro";
                 version = "0.9.4";
-                format = "setuptools";
+                format = "pyproject";
                 src = prev.python312Packages.fetchPypi {
                   pname = "kokoro";
                   version = "0.9.4";
-                  sha256 = "sha256-+/YzJieX+M9G/awzFc+creZ9yLdiwP7M8zSJJ3L7msQ=";
+                  hash = "sha256:1zcyg3jwwkd9smp5j59cbzjd7lsr4j3fk5n3j9mbv1m2ciixqad1";
                 };
+                nativeBuildInputs = with prev.python312Packages; [
+                  setuptools
+                  wheel
+                  hatchling
+                ];
                 propagatedBuildInputs = with prev.python312Packages; [
                   misaki
-                  torch
+                  torch-bin
                   soundfile
                   phonemizer
+                  phonemizer-fork
                   munch
                   numpy
                   transformers
+                  huggingface-hub
+                  loguru
+                  # Additional dependencies
+                  cn2an
+                  mishkal-hebrew
+                  mojimoji
+                  pyopenjtalk
+                  pypinyin-dict
+                  spacy-curated-transformers
+                  underthesea
                 ];
                 doCheck = false;
               };
@@ -100,26 +275,23 @@
           };
           overlays = [overlay];
         };
-        depGenerator = ps: let
-          torch = ps.torch-bin;
-          torchvision = ps.torchvision-bin;
-        in [
-          ps.aiohttp
-          ps.ctranslate2
-          torch
-          torchvision
-          ps.faster-whisper
-          ps.munch
-          ps.nltk
-          ps.numpy
-          ps.phonemizer
-          ps.requests
-          ps.scipy
-          ps.soundfile
-          ps.transformers
-          ps.websockets
-          ps.misaki # Add misaki as a dependency
-          ps.kokoro # Keep kokoro as a dependency
+        depGenerator = ps: with ps; [
+          aiohttp
+          ctranslate2
+          torch-bin
+          torchvision-bin
+          faster-whisper
+          munch
+          nltk
+          numpy
+          phonemizer
+          requests
+          scipy
+          soundfile
+          transformers
+          websockets
+          misaki
+          kokoro
         ];
         deps = with pkgs;
           [
