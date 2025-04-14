@@ -57,7 +57,8 @@
                   substituteInPlace src/espeakng_loader/__init__.py \
                     --replace 'libespeak-ng.so' '${prev.espeak-ng}/lib/libespeak-ng.so' \
                     --replace 'libespeak-ng.so.1' '${prev.espeak-ng}/lib/libespeak-ng.so.1' \
-                    --replace 'libespeak-ng' '${prev.espeak-ng}/lib/libespeak-ng'
+                    --replace 'libespeak-ng' '${prev.espeak-ng}/lib/libespeak-ng' \
+                    --replace "data_path = Path(__file__).parent / 'espeak-ng-data'" "data_path = Path('${prev.espeak-ng}/share/espeak-ng-data')"
                 '';
                 
                 doCheck = false;
@@ -210,6 +211,47 @@
                 };
               };
               
+              # curated-tokenizers package
+              curated-tokenizers = prev.python312Packages.buildPythonPackage {
+                pname = "curated-tokenizers";
+                version = "2.0.0";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/fe/33/0ce2cad39bdcaa8eeda2a7de7ce4613ea6f5c540d5accf0fbe51c9f5253c/curated_tokenizers-2.0.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
+                  hash = "sha256-m5SNKZFXwxdHTXwsMlsHMYfGEjxcUgsplgNUh4G4uYo=";
+                };
+                propagatedBuildInputs = with prev.python312Packages; [
+                  tokenizers
+                ];
+                doCheck = false;
+                meta = {
+                  description = "Curated tokenizers for NLP";
+                  homepage = "https://github.com/explosion/curated-tokenizers";
+                };
+              };
+              
+              # curated-transformers package
+              curated-transformers = prev.python312Packages.buildPythonPackage {
+                pname = "curated-transformers";
+                version = "2.0.1";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://files.pythonhosted.org/packages/1d/16/62dcf539c53ec0a7f27c308e4665aecd4e4eafa0c3b7d4fe544ab9409525/curated_transformers-2.0.1-py2.py3-none-any.whl";
+                  hash = "sha256-XakqS/Qaigvryjm2Xt5NtJp7x4Rnyjw7p/hOzcyMReU=";
+                };
+                propagatedBuildInputs = with prev.python312Packages; [
+                  torch-bin
+                  numpy
+                  transformers
+                  curated-tokenizers
+                ];
+                doCheck = false;
+                meta = {
+                  description = "Curated transformer models";
+                  homepage = "https://github.com/explosion/curated-transformers";
+                };
+              };
+              
               # spacy-curated-transformers package
               spacy-curated-transformers = prev.python312Packages.buildPythonPackage {
                 pname = "spacy-curated-transformers";
@@ -219,7 +261,12 @@
                   url = "https://files.pythonhosted.org/packages/65/4a/9c2b5d676f820e2d3672d8532def8a193e8cb9530824ce16b232b707c1a0/spacy_curated_transformers-2.1.2-py2.py3-none-any.whl";
                   hash = "sha256:069my5q5nlw6hlrk5agqirxki6272mgjj4c9242a8ajdapb2dmfl";
                 };
-                propagatedBuildInputs = [ ];
+                propagatedBuildInputs = with prev.python312Packages; [
+                  spacy
+                  curated-transformers
+                  torch-bin
+                  transformers
+                ];
                 doCheck = false;
                 meta = {
                   description = "Curated transformer models for spaCy";
@@ -244,6 +291,40 @@
                 };
               };
               
+              # en_core_web_trf package (spaCy model)
+              en_core_web_trf = prev.python312Packages.buildPythonPackage {
+                pname = "en_core_web_trf";
+                version = "3.7.0";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://huggingface.co/spacy/en_core_web_trf/resolve/main/en_core_web_trf-any-py3-none-any.whl";
+                  hash = "sha256-9yq7NL3xdIdr1CZ7KbJQFnfmBeCiUf3FbBYwAxgu1os=";
+                };
+                propagatedBuildInputs = with prev.python312Packages; [ spacy ];
+                doCheck = false;
+                meta = {
+                  description = "English pipeline optimized for CPU. Components: tok, lemma, pos, morph, dep, ner.";
+                  homepage = "https://spacy.io";
+                };
+              };
+              
+              # en_core_web_sm package (spaCy model)
+              en_core_web_sm = prev.python312Packages.buildPythonPackage {
+                pname = "en_core_web_sm";
+                version = "3.7.0";
+                format = "wheel";
+                src = prev.fetchurl {
+                  url = "https://huggingface.co/spacy/en_core_web_sm/resolve/main/en_core_web_sm-any-py3-none-any.whl";
+                  hash = "sha256-hswUH2OULUssX87gZjD9b5BHiNLwqwBczkWq24+3OIk=";
+                };
+                propagatedBuildInputs = with prev.python312Packages; [ spacy ];
+                doCheck = false;
+                meta = {
+                  description = "English pipeline optimized for CPU. Components: tok, lemma, pos, morph, dep, ner.";
+                  homepage = "https://spacy.io";
+                };
+              };
+              
               # Main misaki package
               misaki = prev.python312Packages.buildPythonPackage {
                 pname = "misaki";
@@ -254,9 +335,11 @@
                   version = "0.9.4";
                   hash = "sha256-OWD6Pm3heakO6OYoRGpKT2uMcwtuNBCZnPOWGJ9NnEA=";
                 };
-                patches = [
-                  ./misaki-espeak-fix.patch
-                ];
+                postPatch = ''
+                  substituteInPlace misaki/espeak.py \
+                    --replace "EspeakWrapper.set_data_path(espeakng_loader.get_data_path())" \
+                              "EspeakWrapper.data_path = espeakng_loader.get_data_path()"
+                '';
                 nativeBuildInputs = with prev.python312Packages; [
                   setuptools
                   wheel
@@ -269,6 +352,8 @@
                   numpy
                   torch-bin
                   spacy
+                  en_core_web_sm
+                  en_core_web_trf
                   num2words
                   # English support
                   nltk
@@ -317,6 +402,7 @@
                   # pyopenjtalk
                   pypinyin-dict
                   spacy-curated-transformers
+                  curated-transformers
                   underthesea
                 ];
                 doCheck = false;
@@ -341,6 +427,8 @@
           nltk
           numpy
           phonemizer
+          pip
+          pysocks
           requests
           scipy
           soundfile
