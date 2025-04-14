@@ -437,6 +437,52 @@
           misaki
           kokoro
         ];
+        # Create a package for the Kokoro model files
+        kokoro-model = let
+          # Define the URLs and hashes for the model files
+          configJson = pkgs.fetchurl {
+            url = "https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/config.json";
+            sha256 = "sha256-WrsB4kA7ByvwPQT94WBEPiCdeg2tSaQjvhUZa5tDwX8=";
+          };
+          
+          modelFile = pkgs.fetchurl {
+            url = "https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/kokoro-v1_0.pth";
+            sha256 = "sha256-SW26EY0aWPXz2y78iNvcIW4Eg/yJ/m5H7h8sU/GK0eQ=";
+          };
+          
+          voiceAfHeart = pkgs.fetchurl {
+            url = "https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/voices/af_heart.pt";
+            sha256 = "sha256-CrVwm4/6sZv9hJzRHZj3W2CvdzMlOtDWexI4KhAstP8=";
+          };
+        in pkgs.stdenv.mkDerivation {
+          name = "kokoro-model";
+          
+          # We don't need any source files
+          dontUnpack = true;
+          
+          # Create the directory structure and copy the files
+          installPhase = ''
+            mkdir -p $out/models
+            mkdir -p $out/voices
+            
+            # Copy config.json
+            cp ${configJson} $out/models/config.json
+            
+            # Copy the model file
+            cp ${modelFile} $out/models/kokoro-v1_0.pth
+            
+            # Copy the voice file
+            cp ${voiceAfHeart} $out/voices/af_heart.pt
+          '';
+          
+          # Add metadata
+          meta = {
+            description = "Kokoro TTS model files from Hugging Face";
+            homepage = "https://huggingface.co/hexgrad/Kokoro-82M";
+            license = pkgs.lib.licenses.asl20;
+          };
+        };
+        
         deps = with pkgs;
           [
             stdenv.cc.cc.lib
@@ -466,6 +512,49 @@
 
             # This is the key that shows everything works
             python -c "from misaki import en; from kokoro import KModel, KPipeline"
+          '';
+        };
+        
+        # Add a test to verify kokoro functionality
+        checks = {
+          kokoro-test = pkgs.runCommand "kokoro-test" {
+            buildInputs = deps ++ (with pkgs; [
+              python312
+              libsndfile
+              kokoro-model  # Add the kokoro-model package
+            ]);
+          } ''
+            # Set up environment
+            export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.stdenv.cc.cc.lib}/lib"
+            export KOKORO_MODEL_PATH=${kokoro-model}  # Set the model path
+            
+            # Copy the test script to the build directory
+            cp ${./kokoro-test.py} ./kokoro-test.py
+            
+            # Run the test script
+            echo "Running kokoro test script..."
+            ${pkgs.python312}/bin/python ./kokoro-test.py
+            
+            # Verify the WAV file was created
+            if [ ! -f hello_world.wav ]; then
+              echo "Test failed: hello_world.wav was not created"
+              exit 1
+            fi
+            
+            # Check file size (should be non-zero)
+            if [ ! -s hello_world.wav ]; then
+              echo "Test failed: hello_world.wav is empty"
+              exit 1
+            fi
+            
+            echo "Kokoro test passed successfully!"
+            
+            # Create output directory and copy the WAV file
+            mkdir -p $out/share
+            cp hello_world.wav $out/share/
+            
+            # Create a success marker
+            touch $out/success
           '';
         };
       }
