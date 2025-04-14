@@ -34,16 +34,34 @@
               espeakng-loader = prev.python312Packages.buildPythonPackage {
                 pname = "espeakng-loader";
                 version = "0.1.0";
-                format = "setuptools";
+                format = "pyproject";
+                
                 src = prev.fetchFromGitHub {
                   owner = "thewh1teagle";
                   repo = "espeakng-loader";
                   rev = "main";
-                  hash = "sha256:1lw1raa0wrqfl0893zaxjzv5j778qfp5vm236nra547hhqydld8z";
+                  hash = "sha256-YlqlC5/x54y2nz2o4InCXOy802VE2VEDl7SRr3sBcTk=";
                 };
-                buildInputs = [ prev.espeak-ng ];
-                propagatedBuildInputs = [ ];
+                
+                nativeBuildInputs = with prev.python312Packages; [
+                  setuptools
+                  wheel
+                  pip
+                  hatchling
+                ] ++ [ prev.tree ];
+                
+                propagatedBuildInputs = [  prev.espeak-ng ];
+                
+                # Debug the file structure and then patch the package
+                postPatch = ''
+                  substituteInPlace src/espeakng_loader/__init__.py \
+                    --replace 'libespeak-ng.so' '${prev.espeak-ng}/lib/libespeak-ng.so' \
+                    --replace 'libespeak-ng.so.1' '${prev.espeak-ng}/lib/libespeak-ng.so.1' \
+                    --replace 'libespeak-ng' '${prev.espeak-ng}/lib/libespeak-ng'
+                '';
+                
                 doCheck = false;
+                
                 meta = {
                   description = "Python loader for espeak-ng";
                   homepage = "https://github.com/thewh1teagle/espeakng-loader";
@@ -119,26 +137,61 @@
               };
               
               # pyopenjtalk package
-              pyopenjtalk = prev.python312Packages.buildPythonPackage {
-                pname = "pyopenjtalk";
-                version = "0.4.1";
-                format = "sttuptoopstools";
-                src = prev.fetchurl {
-                  url = "https://files.pythonhosted.org/packages/58/74/dc031c696f447ba3817ba31b504bf11a9756c1f90f7d563e343883e10b44a/pyopenjtalk-0.4trgz
-                  hash = "sha256:1p7h80sgk7hipvcbk3ba4ymxfspzd2bfnwy2g4f2rdf2gxps9bfm";
-                };
-                nativeBuildInputs = with prev.python312Packages; [
-                  numpy
-                ] ++ [ prev.cmake ];
-                propagatedBuildInputs = with prev.python312Packages; [
-                  numpy
-                ];
-                doCheck = false;
-                meta = {
-                  description = "Python wrapper for OpenJTalk";
-                  homepage = "https://github.com/r9y9/pyopenjtalk";
-                };
-              };
+              # pyopenjtalk = let
+              #   dic-dirname = "open_jtalk_dic_utf_8-1.11";
+              #   dic-src = prev.fetchzip {
+              #     url = "https://github.com/r9y9/open_jtalk/releases/download/v1.11.1/${dic-dirname}.tar.gz";
+              #     hash = "sha256-+6cHKujNEzmJbpN9Uan6kZKsPdwxRRzT3ZazDnCNi3s=";
+              #   };
+              # in prev.python312Packages.buildPythonPackage {
+              #   pname = "pyopenjtalk";
+              #   version = "0-unstable-2023-09-08";
+              #   format = "pyproject";
+              #   
+              #   src = prev.fetchFromGitHub {
+              #     owner = "r9y9";
+              #     repo = "pyopenjtalk";
+              #     rev = "v0.3.0";
+              #     hash = "sha256-Yd+Uc9/Ixq8/Hs9/uxLWyFfPnHH/QgRPxUB+Hl+Wd+Y=";
+              #     fetchSubmodules = true;
+              #   };
+              #   
+              #   postPatch = ''
+              #     substituteInPlace pyproject.toml \
+              #         --replace-fail 'setuptools<v60.0' 'setuptools'
+              #   '';
+              #   
+              #   nativeBuildInputs = with prev.python312Packages; [
+              #     setuptools
+              #     wheel
+              #     cython
+              #     numpy
+              #   ] ++ [ 
+              #     prev.cmake 
+              #     prev.pkg-config
+              #   ];
+              #   
+              #   propagatedBuildInputs = with prev.python312Packages; [
+              #     numpy
+              #     six
+              #     tqdm
+              #   ];
+              #   
+              #   dontUseCmakeConfigure = true;
+              #   
+              #   # Skip tests
+              #   doCheck = false;
+              #   
+              #   postInstall = ''
+              #     ln -s ${dic-src} $out/${prev.python312Packages.python.sitePackages}/pyopenjtalk/${dic-dirname}
+              #   '';
+              #   
+              #   meta = {
+              #     description = "Python wrapper for OpenJTalk";
+              #     homepage = "https://github.com/r9y9/pyopenjtalk";
+              #     license = prev.lib.licenses.mit;
+              #   };
+              # };
               
               # pypinyin-dict package
               pypinyin-dict = prev.python312Packages.buildPythonPackage {
@@ -199,8 +252,11 @@
                 src = prev.python312Packages.fetchPypi {
                   pname = "misaki";
                   version = "0.9.4";
-                  hash = "sha256:0nm1il7zr7vcp98498pja7b05kbbxb95hl4y89602v3qd6qyxqlh";
+                  hash = "sha256-OWD6Pm3heakO6OYoRGpKT2uMcwtuNBCZnPOWGJ9NnEA=";
                 };
+                patches = [
+                  ./misaki-espeak-fix.patch
+                ];
                 nativeBuildInputs = with prev.python312Packages; [
                   setuptools
                   wheel
@@ -236,7 +292,7 @@
                 src = prev.python312Packages.fetchPypi {
                   pname = "kokoro";
                   version = "0.9.4";
-                  hash = "sha256:1zcyg3jwwkd9smp5j59cbzjd7lsr4j3fk5n3j9mbv1m2ciixqad1";
+                  hash = "sha256-+/YzJieX+M9G/awzFc+creZ9yLdiwP7M8zSJJ3L7msQ=";
                 };
                 nativeBuildInputs = with prev.python312Packages; [
                   setuptools
@@ -258,7 +314,7 @@
                   cn2an
                   mishkal-hebrew
                   mojimoji
-                  pyopenjtalk
+                  # pyopenjtalk
                   pypinyin-dict
                   spacy-curated-transformers
                   underthesea

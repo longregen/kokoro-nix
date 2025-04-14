@@ -1,0 +1,13 @@
+diff --git a/misaki/espeak.py b/misaki/espeak.py
+index xxxxxxx..xxxxxxx 100644
+--- a/misaki/espeak.py
++++ b/misaki/espeak.py
+@@ -7,7 +7,7 @@ import phonemizer
+ 
+ # Set espeak-ng library path and espeak-ng-data
+ EspeakWrapper.set_library(espeakng_loader.get_library_path())
+-EspeakWrapper.set_data_path(espeakng_loader.get_data_path())
++EspeakWrapper.data_path = espeakng_loader.get_data_path()
+ 
+ # Phonemizer backend
+ _ESPEAK_PHONEMIZER = phonemizer.backend.EspeakBackend(
