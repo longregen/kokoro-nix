@@ -109,8 +109,8 @@
                 version = "0.0.13";
                 format = "wheel";
                 src = prev.fetchurl {
-                  url = "https://files.pythonhosted.org/packages/cd/4e/0d7f019386bc4feb8096b5e8150d2e2dadd377be178d950654830541b5a3/mojimoji-0.0.13-cp310-cp310-macosx_10_9_x86_64.whl";
-                  hash = "sha256:132vjixcbri25pish9qf9snpj8cm9ihllp9nxwz5gb5qgvnmzqyl";
+                  url = "https://files.pythonhosted.org/packages/b8/bc/f262abd0bec2316cbfe972ba2a79c0d5836f0f536877fa59347a76065f80/mojimoji-0.0.13-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
+                  hash = "sha256-PF/TjR9AedxUrHn5Ow5UQsZgspejhoMIJR/8N76xIWs=";
                 };
                 propagatedBuildInputs = [ ];
                 doCheck = false;
@@ -294,11 +294,11 @@
               # en_core_web_trf package (spaCy model)
               en_core_web_trf = prev.python312Packages.buildPythonPackage {
                 pname = "en_core_web_trf";
-                version = "3.7.0";
+                version = "3.7.3";
                 format = "wheel";
                 src = prev.fetchurl {
                   url = "https://huggingface.co/spacy/en_core_web_trf/resolve/main/en_core_web_trf-any-py3-none-any.whl";
-                  hash = "sha256-9yq7NL3xdIdr1CZ7KbJQFnfmBeCiUf3FbBYwAxgu1os=";
+                  hash = "sha256:12yn5qc06c0ndk2zsld2w02ycxqna2r2jyr6simqfx7iplsbnapp";
                 };
                 propagatedBuildInputs = with prev.python312Packages; [ spacy ];
                 doCheck = false;
@@ -311,11 +311,11 @@
               # en_core_web_sm package (spaCy model)
               en_core_web_sm = prev.python312Packages.buildPythonPackage {
                 pname = "en_core_web_sm";
-                version = "3.7.0";
+                version = "3.7.1";
                 format = "wheel";
                 src = prev.fetchurl {
                   url = "https://huggingface.co/spacy/en_core_web_sm/resolve/main/en_core_web_sm-any-py3-none-any.whl";
-                  hash = "sha256-hswUH2OULUssX87gZjD9b5BHiNLwqwBczkWq24+3OIk=";
+                  hash = "sha256:129qny7xpaj5rrf01azhsa44g43gzlq6dq6fbwn4nbclccgi9k46";
                 };
                 propagatedBuildInputs = with prev.python312Packages; [ spacy ];
                 doCheck = false;
